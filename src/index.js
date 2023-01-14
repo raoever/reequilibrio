@@ -71,4 +71,4 @@ app.post("/extract-text", upload.single("file"), (req, res) => {
 });
 
 app.listen(3000);
-console.log("rodando...");
+console.log("ativo...");
