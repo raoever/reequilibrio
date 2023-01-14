@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <link
+      href="https://getbootstrap.com/docs/5.3/assets/css/docs.css"
+      rel="stylesheet"
+    />
+    <title>REF SMT/TO</title>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <style>
+      .navbar {
+        color: white;
+        font-size: large;
+      }
+
+      .active,
+      .nav-link:hover {
+        background-color: #666;
+        color: white;
+      }
+
+      .form-inline {
+        width: 50%;
+      }
+
+      #formulario {
+        width: 100%;
+        margin-right: auto;
+        border-radius: 10px;
+      }
+
+      #recorrencia15 {
+        width: 90%;
+      }
+
+      #recorrencia25 {
+        width: 90%;
+      }
+
+      #recorrencia50 {
+        width: 90%;
+      }
+
+      #recorrencia100 {
+        width: 90%;
+      }
+
+      #zona {
+        width: 100%;
+        text-transform: uppercase;
+      }
+
+      #nalinha {
+        width: 610px;
+        margin-left: 1px;
+        padding-left: 1px;
+      }
+
+      #vazao {
+        width: 90%;
+        margin-right: auto;
+        margin-left: auto;
+      }
+
+      .container-fluid {
+        width: 90%;
+      }
+    </style>
+    <title>Reequilíbrio Econômico Financeiro SMT/TO</title>
+  </head>
+  <body>
+    <div class="container-fluid">
+      <header class="navbar fixed-top navbar-expand-lg navbar-dark bg-dark">
+        <nav class="navbar fixed-top bg-dark" data-bs-theme="dark">
+          <a style="margin-left: 15px" class="navbar-brand" href="#"
+            >Reequilíbrio Econômico Financeiro SMT/TO</a
+          >
+        </nav>
+      </header>
+      <div>
+        <form id="formulario">
+          <div class="form-group">
+            <br />
+            <br />
+            <br />
+            <br />
+            <br />
+            <label><b>Contrato</b></label>
+            <input
+              type="form-text"
+              class="form-control"
+              id="inpContrato"
+              placeholder="Número Contrato"
+              disabled
+            />
+          </div>
+          <div class="form-group">
+            <label><b>Empresa</b></label>
+            <input
+              type="form-text"
+              class="form-control"
+              id="inpEmpresa"
+              placeholder="Nome da Empresa"
+              disabled
+            />
+          </div>
+          <div class="form-group">
+            <label style="margin-top: 8px" for="formFile" class="form-label"
+              ><b>Selecione o Resumo do Contrato</b></label
+            >
+            <div class="input-group">
+              <input type="file" class="form-control" id="inpFile" />
+              <button
+                class="btn btn-outline-secondary"
+                type="button"
+                id="btnUpload"
+                accept="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel"
+              >
+                Upload
+              </button>
+            </div>
+          </div>
+          <div id="resultText"></div>
+        </form>
+      </div>
+    </div>
+    <script>
+      let contrato;
+      let empresa;
+      let solicitadoPor;
+      let paginas;
+      let familias;
+      let composicoes;
+      let subtitulos;
+      let planilha;
+      let tabelaArray = [];
+      let tabela;
+      let ignorar = [
+        "Item de",
+        "Serviço",
+        "Departamento Nacional de Infra-Estrutura de TransportesDiretoria de Administração e FinançasCoordenação-Geral de Tecnologia da Informação",
+        "RESUMO DO CONTRATO",
+        "Contrato:",
+        "Empresa:",
+        "Unidade Resp. pela Fiscalização:",
+        "Unidade Resp. pela Gestão do Pagamento:",
+        "S.R.E - TO",
+        "CGMRR / DIR",
+        "PLANILHA DE SERVIÇOS",
+        "Versão dos Serviços: Versão 1",
+        "Versão dos Serviços: Versão 2",
+        "Versão dos Serviços: Versão 3",
+        "ITEM DE PLANILHA",
+        "Descrição do Serviço",
+        "Unid.",
+        "Quantidade de Projeto",
+        "Preço Unitário",
+        "Valor a PI",
+        "Índice de Reajust.",
+        "Código",
+        "Solicitado",
+        "Subtotal",
+        " ",
+        "",
+      ];
+
+      const inpFile = document.getElementById("inpFile");
+      const btnUpload = document.getElementById("btnUpload");
+      const resultText = document.getElementById("resultText");
+      const inpContrato = document.getElementById("inpContrato");
+
+      btnUpload.addEventListener("click", () => {
+        const formData = new FormData();
+
+        formData.append("file", inpFile.files[0]);
+
+        fetch("/extract-text", {
+          method: "post",
+          body: formData,
+        })
+          .then((response) => response.json())
+          .then((data) => {
+            criarTabela(data);
+          });
+      });
+
+      function criarTabela(dados) {
+        const dadosJson = JSON.parse(dados);
+        console.log("dados: " + dadosJson[0].produto);
+        tabela = `<br><h2>Preços Médios Ponderados Semanais</h2>
+            <table class="table table-striped">
+              <thead>
+                <tr>
+                  <th scope="col">Produto</th>
+                  <th scope="col">Início</th>
+                  <th scope="col">Fim</th>
+                  <th scope="col">Norte</th>
+                  <th scope="col">Nordeste</th>
+                  <th scope="col">Centro-Oeste</th>
+                  <th scope="col">Sul</th>
+                  <th scope="col">Sudeste</th>
+                  <th scope="col">Brasil</th>
+                </tr>
+              </thead>
+              <tbody>`;
+
+        for (let i = 0; i < dadosJson.length; i++) {
+          //debugger;
+          tabela += `<tr>
+            <td>${dadosJson[i].produto}</td>
+            <td>${dadosJson[i].inicio}</td>
+            <td>${dadosJson[i].fim}</td>
+            <td>${dadosJson[i].norte}</td>
+            <td>${dadosJson[i].nordeste}</td>
+            <td>${dadosJson[i].centro}</td>
+            <td>${dadosJson[i].sul}</td>
+            <td>${dadosJson[i].sudeste}</td>
+            <td>${dadosJson[i].brasil}</td>
+            </tr>`;
+        }
+
+        tabela += `</tbody></table>`;
+        resultText.innerHTML = tabela;
+      }
+
+      function formataValor(numStr) {
+        //let numStr = dados[i].valor;
+        numStr = numStr.replace(/\./g, "");
+        numStr = numStr.replace(",", ".");
+        return parseFloat(numStr);
+      }
+    </script>
+  </body>
+</html>
