@@ -29,43 +29,37 @@
         width: 50%;
       }
 
-      #formulario {
+      #titulo {
+        width: 30%;
+        margin-top: 2rem;
+        height: 2.5em;
+      }
+
+      #cabecalho {
+        margin-top: 1rem;
+        margin-bottom: 1rem;
+        height: 1em;
+      }
+
+      .skeleton {
+        opacity: 0.7;
+        animation: skeleton-loading 1s linear infinite alternate;
+      }
+
+      .skeleton-text {
         width: 100%;
-        margin-right: auto;
-        border-radius: 10px;
+        height: 2em;
+        margin-bottom: 0.125rem;
+        border-radius: 0.125rem;
       }
 
-      #recorrencia15 {
-        width: 90%;
-      }
-
-      #recorrencia25 {
-        width: 90%;
-      }
-
-      #recorrencia50 {
-        width: 90%;
-      }
-
-      #recorrencia100 {
-        width: 90%;
-      }
-
-      #zona {
-        width: 100%;
-        text-transform: uppercase;
-      }
-
-      #nalinha {
-        width: 610px;
-        margin-left: 1px;
-        padding-left: 1px;
-      }
-
-      #vazao {
-        width: 90%;
-        margin-right: auto;
-        margin-left: auto;
+      @keyframes skeleton-loading {
+        0% {
+          background-color: hsl(200, 20%, 70%);
+        }
+        100% {
+          background-color: hsl(200, 20%, 95%);
+        }
       }
 
       .container-fluid {
@@ -87,8 +81,12 @@
         <br />
         <br />
         <br />
-        <form action="https://www.gov.br/anp/pt-br/assuntos/precos-e-defesa-da-concorrencia/precos/ppidp/precos-medios-ponderados-semanais-2013.xls">
-          <button type="submit" class="btn btn-primary">Downloda Planilha ANP</button>
+        <form
+          action="https://www.gov.br/anp/pt-br/assuntos/precos-e-defesa-da-concorrencia/precos/ppidp/precos-medios-ponderados-semanais-2013.xls"
+        >
+          <button type="submit" class="btn btn-primary">
+            Downloda Planilha ANP
+          </button>
         </form>
         <form id="formulario">
           <div class="form-group">
@@ -128,7 +126,21 @@
               </button>
             </div>
           </div>
-          <div id="resultText"></div>
+          <div id="resultText">
+            <div id="titulo"></div>
+            <div id="cabecalho"></div>
+            <div class="itens"></div>
+            <div class="itens"></div>
+            <div class="itens"></div>
+            <div class="itens"></div>
+            <div class="itens"></div>
+            <div class="itens"></div>
+            <div class="itens"></div>
+            <div class="itens"></div>
+            <div class="itens"></div>
+            <div class="itens"></div>
+            <div class="itens"></div>
+          </div>
         </form>
       </div>
     </div>
@@ -176,10 +188,17 @@
       const btnUpload = document.getElementById("btnUpload");
       const resultText = document.getElementById("resultText");
       const inpContrato = document.getElementById("inpContrato");
+      const titulo = document.getElementById("titulo");
+      const cabecalho = document.getElementById("cabecalho");
+      const itens = document.getElementsByClassName("itens");
 
       btnUpload.addEventListener("click", () => {
         const formData = new FormData();
-
+        titulo.classList.add("skeleton", "skeleton-text");
+        cabecalho.classList.add("skeleton", "skeleton-text");
+        for (let i = 0; i < itens.length; i++) {
+          itens[i].classList.add("skeleton", "skeleton-text");
+        }
         formData.append("file", inpFile.files[0]);
 
         fetch("/extract-text", {
